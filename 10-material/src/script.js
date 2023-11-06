@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui';
 import gsap from 'gsap'
 // import imageSource from '../static/textures/door/color.jpg'
+// import {SRGBColorSpace} from 'three/src/constants.d.ts'
 
 
 //纹理
@@ -33,15 +34,18 @@ const loadingManager = new THREE.LoadingManager()
 
 //初始化加载器
 const textureLoader = new THREE.TextureLoader(loadingManager)
-// const colorTexture = textureLoader.load('/textures/door/color.jpg')
-const colorTexture = textureLoader.load('/textures/minecraft.png')
+const colorTexture = textureLoader.load('/textures/door/color.jpg')
+// const colorTexture = textureLoader.load('/textures/minecraft.png')
 const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
 const heightTexture = textureLoader.load('/textures/door/height.jpg')
 const normalTexture = textureLoader.load('/textures/door/normal.jpg')
 const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
 const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
 const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+const matcapTexture = textureLoader.load('/textures/matcaps/1.png')
+const gradientTexture = textureLoader.load('/textures/gradients/3.jpg')
 
+// colorTexture.colorSpace = THREE.SRGBColorSpace
 // colorTexture.repeat.x = 2
 // colorTexture.repeat.y = 3
 // colorTexture.wrapS = THREE.MirroredRepeatWrapping
@@ -91,38 +95,43 @@ window.addEventListener('resize', () => {
 
 })
 
-//双击全屏
-// window.addEventListener('dblclick', () => {
-//     if (!document.fullscreenElement) {
-//         canvas.requestFullscreen()
-//     }
-//     else {
-//         document.exitFullscreen()
-//     }
-// })
 
 //初始化场景 
 const scene = new THREE.Scene()
 
 //创建一个立方体
-const geometry = new THREE.BoxBufferGeometry(1, 1, 1)
+// const geometry = new THREE.BoxBufferGeometry(1, 1, 1)
 // console.log(geometry.attributes.uv);
 //材质 
 const material = new THREE.MeshBasicMaterial({ map: colorTexture })
 //创建网格
-const mesh = new THREE.Mesh(geometry, material)
-//场景添加网格
-scene.add(mesh)
+const sphere = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.5, 16, 16),
+    material
+)
+const plane = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry(1, 1),
+    material
+)
+const torus = new THREE.Mesh(
+    new THREE.TorusBufferGeometry(0.3, 0.2, 16, 32),
+    material
+)
+
+sphere.position.x = -1.5
+torus.position.x = 1.5
+//场景添加网格  支持一次性添加多个网格
+scene.add(sphere, plane, torus)
 
 //调试工具
-const gui = new dat.GUI({ closed: true });
-gui.add(mesh.position, 'y', -3, 3, 0.01)
-gui.add(mesh, 'visible')
-gui.add(material, 'wireframe')
-gui.addColor(paramaters, 'color').onChange(() => {
-    material.color.set(paramaters.color)
-})
-gui.add(paramaters, 'spin')
+// const gui = new dat.GUI({ closed: true });
+// gui.add(mesh.position, 'y', -3, 3, 0.01)
+// gui.add(mesh, 'visible')
+// gui.add(material, 'wireframe')
+// gui.addColor(paramaters, 'color').onChange(() => {
+//     material.color.set(paramaters.color)
+// })
+// gui.add(paramaters, 'spin')
 // gui.add(mesh.position,'z',-3,3,0.01)
 // gui.add(mesh.position,'x',-3,3,0.01)
 
@@ -141,7 +150,7 @@ const camera = new THREE.PerspectiveCamera(75, aspectRadio, 0.1, 1000)
 // camera.position.set = (0, 0, 3)
 // camera.position.z = 3
 camera.position.set(2, 2, 2)
-camera.lookAt(mesh.position)
+// camera.lookAt(mesh.position)
 scene.add(camera)
 
 //轨道控制器
@@ -163,6 +172,15 @@ const clock = new THREE.Clock()
 const tick = () => {
     //clock
     const elapsedTime = clock.getElapsedTime()
+
+    // 更新动画
+    sphere.rotation.y = 0.1 * elapsedTime
+    plane.rotation.y = 0.1 * elapsedTime
+    torus.rotation.y = 0.1 * elapsedTime
+
+    sphere.rotation.x = 0.15 * elapsedTime
+    plane.rotation.x = 0.15 * elapsedTime
+    torus.rotation.x = 0.15 * elapsedTime
     //更新动画
     // camera.position.y = Math.sin(elapsedTime)
     // mesh.rotation.y = elapsedTime

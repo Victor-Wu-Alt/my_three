@@ -34,6 +34,15 @@ const loadingManager = new THREE.LoadingManager()
 
 //初始化加载器
 const textureLoader = new THREE.TextureLoader(loadingManager)
+const cubeTextureLoader = new THREE.CubeTextureLoader()
+const environmentMapTexture = cubeTextureLoader.load([
+    '/textures/environmentMaps/0/px.jpg',
+    '/textures/environmentMaps/0/nx.jpg',
+    '/textures/environmentMaps/0/py.jpg',
+    '/textures/environmentMaps/0/ny.jpg',
+    '/textures/environmentMaps/0/pz.jpg',
+    '/textures/environmentMaps/0/nz.jpg'
+])
 const colorTexture = textureLoader.load('/textures/door/color.jpg')
 // const colorTexture = textureLoader.load('/textures/minecraft.png')
 const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
@@ -42,7 +51,7 @@ const normalTexture = textureLoader.load('/textures/door/normal.jpg')
 const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
 const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
 const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
-const matcapTexture = textureLoader.load('/textures/matcaps/1.png')
+const matcapTexture = textureLoader.load('/textures/matcaps/8.png')
 const gradientTexture = textureLoader.load('/textures/gradients/3.jpg')
 
 // colorTexture.colorSpace = THREE.SRGBColorSpace
@@ -103,31 +112,104 @@ const scene = new THREE.Scene()
 // const geometry = new THREE.BoxBufferGeometry(1, 1, 1)
 // console.log(geometry.attributes.uv);
 //材质 
-const material = new THREE.MeshBasicMaterial({ map: colorTexture })
+// const material = new THREE.MeshBasicMaterial()
+// material.map = colorTexture
+// material.color = new THREE.Color(0x00ffff)
+// material.wireframe = true
+// material.opacity = 0.5
+// material.transparent = true
+// material.alphaMap = alphaTexture
+// material.side=THREE.DoubleSide
+
+// const material = new THREE.MeshNormalMaterial()
+// material.map = normalTexture
+// material.wireframe = true
+// material.flatShading = true
+
+// const material = new THREE.MeshMatcapMaterial()
+// material.matcap = matcapTexture
+
+// const material = new THREE.MeshDepthMaterial()
+
+// const material=new THREE.MeshLambertMaterial()
+
+// const material=new THREE.MeshPhongMaterial()
+// material.shininess=100
+// material.specular=new THREE.Color(0x00ffff)
+
+// const material = new THREE.MeshToonMaterial()
+// material.gradientMap = gradientTexture
+// gradientTexture.minFilter = THREE.NearestFilter
+// gradientTexture.magFilter = THREE.NearestFilter
+// gradientTexture.generateMipmaps = false
+
+
+// const material = new THREE.MeshStandardMaterial()
+// material.metalness = 0
+// material.roughness = 1
+// material.map = colorTexture
+// material.aoMap = ambientOcclusionTexture
+// material.aoMapIntensity = 1
+// material.displacementMap = heightTexture
+// material.displacementScale = 0.05
+// material.metalnessMap = matcapTexture
+// material.roughnessMap = roughnessTexture
+// material.normalMap = normalTexture
+// material.normalScale.set(0.5, 0.5)
+// material.transparent = true
+// material.alphaMap = alphaTexture
+
+const material = new THREE.MeshStandardMaterial()
+material.metalness = 0.7
+material.roughness = 0.2
+material.envMap = environmentMapTexture
+
 //创建网格
 const sphere = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.5, 16, 16),
+    new THREE.SphereBufferGeometry(0.5, 64, 64),
     material
 )
 const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(1, 1),
+    new THREE.PlaneBufferGeometry(1, 1, 100, 100),
     material
 )
 const torus = new THREE.Mesh(
-    new THREE.TorusBufferGeometry(0.3, 0.2, 16, 32),
+    new THREE.TorusBufferGeometry(0.3, 0.2, 64, 128),
     material
 )
+
+sphere.geometry.setAttribute('uv2', new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2))
+
+plane.geometry.setAttribute('uv2', new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2))
+
+torus.geometry.setAttribute('uv2', new THREE.BufferAttribute(torus.geometry.attributes.uv.array, 2))
+
 
 sphere.position.x = -1.5
 torus.position.x = 1.5
 //场景添加网格  支持一次性添加多个网格
 scene.add(sphere, plane, torus)
 
+
+//灯光
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+scene.add(ambientLight)
+
+const pointLight = new THREE.PointLight(0xffffff, 0.5)
+pointLight.position.x = 2
+pointLight.position.y = 3
+pointLight.position.z = 4
+scene.add(pointLight)
+
 //调试工具
-// const gui = new dat.GUI({ closed: true });
+const gui = new dat.GUI({ closed: true });
 // gui.add(mesh.position, 'y', -3, 3, 0.01)
 // gui.add(mesh, 'visible')
-// gui.add(material, 'wireframe')
+gui.add(material, 'metalness', 0, 1, 0.0001)
+gui.add(material, 'roughness', 0, 1, 0.0001)
+gui.add(material, 'aoMapIntensity', 0, 10, 0.0001)
+gui.add(material, 'displacementScale', 0, 10, 0.0001)
+
 // gui.addColor(paramaters, 'color').onChange(() => {
 //     material.color.set(paramaters.color)
 // })

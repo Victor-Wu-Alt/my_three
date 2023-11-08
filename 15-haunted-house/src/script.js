@@ -11,8 +11,40 @@ const loadingManager = new THREE.LoadingManager()
 //初始化加载器
 const textureLoader = new THREE.TextureLoader(loadingManager)
 
+//  门的纹理
+const doorColorTexture = textureLoader.load('/textures/door/color.jpg')
+const doorAlphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+const doorAmbientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+const doorHeightTexture = textureLoader.load('/textures/door/height.jpg')
+const doorNormalTexture = textureLoader.load('/textures/door/normal.jpg')
+const doorMetalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+const doorRoughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
 
+// 墙的纹理
+const bricksColorTexture = textureLoader.load('/textures/bricks/color.jpg')
+const bricksAmbientOcclusionTexture = textureLoader.load('/textures/bricks/ambientOcclusion.jpg')
+const bricksNormalTexture = textureLoader.load('/textures/bricks/normal.jpg')
+const bricksRoughnessTexture = textureLoader.load('/textures/bricks/roughness.jpg')
 
+// 地面的纹理
+const grassColorTexture = textureLoader.load('/textures/grass/color.jpg')
+const grassAmbientOcclusionTexture = textureLoader.load('/textures/grass/ambientOcclusion.jpg')
+const grassNormalTexture = textureLoader.load('/textures/grass/normal.jpg')
+const grassRoughnessTexture = textureLoader.load('/textures/grass/roughness.jpg')
+
+grassColorTexture.repeat.set(8, 8)
+grassAmbientOcclusionTexture.repeat.set(8, 8)
+grassNormalTexture.repeat.set(8, 8)
+grassRoughnessTexture.repeat.set(8, 8)
+
+grassColorTexture.wrapS = THREE.RepeatWrapping
+grassColorTexture.wrapT = THREE.RepeatWrapping
+grassAmbientOcclusionTexture.wrapS = THREE.RepeatWrapping
+grassAmbientOcclusionTexture.wrapT = THREE.RepeatWrapping
+grassNormalTexture.wrapS = THREE.RepeatWrapping
+grassNormalTexture.wrapT = THREE.RepeatWrapping
+grassRoughnessTexture.wrapS = THREE.RepeatWrapping
+grassRoughnessTexture.wrapT = THREE.RepeatWrapping
 //过滤器
 // colorTexture.generateMipmaps = false
 // colorTexture.minFilter = THREE.NearestFilter
@@ -20,6 +52,8 @@ const textureLoader = new THREE.TextureLoader(loadingManager)
 
 //获取渲染dom
 const canvas = document.querySelector('.webgl')
+
+
 
 //属性创建
 const paramaters = {
@@ -53,6 +87,9 @@ window.addEventListener('resize', () => {
 //初始化场景 
 const scene = new THREE.Scene()
 
+//雾化
+const fog = new THREE.Fog('#262837', 1, 15)
+scene.fog = fog
 
 const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
 material.metalness = 0
@@ -68,8 +105,14 @@ scene.add(house)
 //房子的墙壁
 const walls = new THREE.Mesh(
     new THREE.BoxGeometry(4, 2.5, 4),
-    new THREE.MeshStandardMaterial({ color: '#ac8e82' })
+    new THREE.MeshStandardMaterial({
+        map: bricksColorTexture,
+        aoMap: bricksAmbientOcclusionTexture,
+        normalMap: bricksNormalTexture,
+        roughness: bricksRoughnessTexture
+    })
 )
+walls.geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(walls.geometry.attributes.uv.array, 2))
 walls.position.y = 1.25
 house.add(walls)
 
@@ -85,11 +128,21 @@ house.add(roof)
 
 // 门
 const door = new THREE.Mesh(
-    new THREE.PlaneGeometry(2, 2),
+    new THREE.PlaneGeometry(2.2, 2.2, 100, 100),
     new THREE.MeshStandardMaterial({
-        color: '#493235'
+        map: doorColorTexture,
+        alphaMap: doorAlphaTexture,
+        transparent: true,
+        aoMap: doorAmbientOcclusionTexture,
+        displacementMap: doorHeightTexture,
+        displacementScale: 0.1,
+        normalMap: doorNormalTexture,
+        metalnessMap: doorMetalnessTexture,
+        roughnessMap: doorRoughnessTexture
     })
 )
+
+door.geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(door.geometry.attributes.uv.array, 2))
 door.position.z = 2 + 0.01
 door.position.y = 1
 house.add(door)
@@ -135,20 +188,24 @@ for (let i = 0; i < 50; i++) {
     grave.position.set(x, 0.4, z)
     grave.rotation.z = (Math.random() - 0.5) * 0.4
     grave.rotation.y = (Math.random() - 0.5) * 0.4
+    grave.castShadow = true
     graves.add(grave)
 }
-
-
-
 
 //地面
 const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 20),
     // material
-    new THREE.MeshBasicMaterial({
-        color: 0x8ca76e
+    new THREE.MeshStandardMaterial({
+        map: grassColorTexture,
+        aoMap: grassAmbientOcclusionTexture,
+        normalMap: grassNormalTexture,
+        roughness: grassRoughnessTexture
     })
 )
+
+
+floor.geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(floor.geometry.attributes.uv.array, 2))
 floor.rotation.x = - Math.PI * 0.5
 floor.position.y = 0
 //接收影子
@@ -162,12 +219,19 @@ scene.add(ambientLight)
 
 const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.12)
 moonLight.position.set(4, 5, -2)
+
 scene.add(moonLight)
+
+//门灯
+const doorLight = new THREE.PointLight('#ff7d46', 1, 7)
+doorLight.position.set(0, 2.2, 2.7)
+
+house.add(doorLight)
 
 // const directionCameraHelper = new THREE.CameraHelper(directLight.shadow.camera)
 // directionCameraHelper.visible = false
 // scene.add(directionCameraHelper)
-   
+
 
 const spotLight = new THREE.SpotLight(0xffffff, 0.3, 6, Math.PI * 0.1, 0.25, 1)
 spotLight.position.set(0, 2, 2)
@@ -195,6 +259,18 @@ scene.add(pointLight)
 const pointCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera)
 pointCameraHelper.visible = false
 scene.add(pointCameraHelper)
+
+//鬼魂
+const ghost1 = new THREE.PointLight('#ff00ff', 2, 3)
+
+scene.add(ghost1)
+
+const ghost2 = new THREE.PointLight('#00ffff', 2, 3)
+
+scene.add(ghost2)
+
+const ghost3 = new THREE.PointLight('#ffff00', 2, 3)
+scene.add(ghost3)
 
 //坐标辅助线
 const axesHelper = new THREE.AxesHelper(5)
@@ -231,8 +307,37 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 //开启阴影贴图
-renderer.shadowMap.enabled = false
+renderer.shadowMap.enabled = true
+moonLight.castShadow = true
+door.castShadow = true
+ghost1.castShadow = true
+ghost2.castShadow = true
+ghost3.castShadow = true
+walls.castShadow = true
+bush1.castShadow = true
+bush2.castShadow = true
+bush3.castShadow = true
+bush4.castShadow = true
+
+floor.receiveShadow = true
+
+moonLight.shadow.mapSize = new THREE.Vector2(256, 256)
+moonLight.shadow.camera.far = 15
+
+doorLight.shadow.mapSize = new THREE.Vector2(256, 256)
+doorLight.shadow.camera.far = 7
+
+ghost1.shadow.mapSize = new THREE.Vector2(256, 256)
+ghost1.shadow.camera.far = 7
+ghost2.shadow.mapSize = new THREE.Vector2(256, 256)
+ghost2.shadow.camera.far = 7
+ghost3.shadow.mapSize = new THREE.Vector2(256, 256)
+ghost3.shadow.camera.far = 7
+// ghost4.shadow.mapSize = new THREE.Vector2(256, 256)
+// ghost4.shadow.camera.far = 7
+
 renderer.shadowMap.type = THREE.PCFSoftShadowMap
+renderer.setClearColor('#262837')
 // renderer.shadowMap.type=THREE.VSMShadowMap
 
 //Clock
@@ -242,6 +347,30 @@ const clock = new THREE.Clock()
 const tick = () => {
     //clock
     const elapsedTime = clock.getElapsedTime()
+
+    //鬼魂1
+    const ghost1Angle = elapsedTime * 0.5
+    ghost1.position.set(
+        Math.cos(ghost1Angle) * 4,
+        Math.sin(elapsedTime * 3),
+        Math.sin(ghost1Angle) * 4,
+    )
+
+    //鬼魂2
+    const ghost2Angle = elapsedTime * 0.32
+    ghost2.position.set(
+        Math.cos(ghost2Angle) * 5,
+        Math.sin(elapsedTime * 4),
+        Math.sin(ghost2Angle) * 5
+    )
+
+    //鬼魂3
+    const ghost3Angle = elapsedTime * 0.18
+    ghost3.position.set(
+        Math.cos(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.32)),
+        Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5),
+        Math.sin(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.25))
+    )
 
     //控制器更新
     controls.update()

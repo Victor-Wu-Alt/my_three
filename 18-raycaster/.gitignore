@@ -1,0 +1,12 @@
+.vercel
+node_modules
+.DS_Store
+dist
+dist-ssr
+.idea
+*.local
+.history
+.vscode
+yarn.lock
+*.vueback
+/yarn-error.log

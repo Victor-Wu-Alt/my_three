@@ -32,14 +32,16 @@ const grassAmbientOcclusionTexture = textureLoader.load('/textures/grass/ambient
 const grassNormalTexture = textureLoader.load('/textures/grass/normal.jpg')
 const grassRoughnessTexture = textureLoader.load('/textures/grass/roughness.jpg')
 
+//水平 垂直方向的重复次数
 grassColorTexture.repeat.set(8, 8)
 grassAmbientOcclusionTexture.repeat.set(8, 8)
 grassNormalTexture.repeat.set(8, 8)
 grassRoughnessTexture.repeat.set(8, 8)
 
+//wraps 水平方向 wrapT 垂直方向
 grassColorTexture.wrapS = THREE.RepeatWrapping
 grassColorTexture.wrapT = THREE.RepeatWrapping
-grassAmbientOcclusionTexture.wrapS = THREE.RepeatWrapping
+grassAmhttps://codemoss-1253302184.cos.ap-beijing.myqcloud.com/img/banner/dengluyemian.pngbientOcclusionTexture.wrapS = THREE.RepeatWrapping
 grassAmbientOcclusionTexture.wrapT = THREE.RepeatWrapping
 grassNormalTexture.wrapS = THREE.RepeatWrapping
 grassNormalTexture.wrapT = THREE.RepeatWrapping
@@ -223,7 +225,7 @@ moonLight.position.set(4, 5, -2)
 scene.add(moonLight)
 
 //门灯
-const doorLight = new THREE.PointLight('#ff7d46', 1, 7)
+const doorLight = new THREE.PointLight('#ff7d46', 2, 7)
 doorLight.position.set(0, 2.2, 2.7)
 
 house.add(doorLight)
@@ -273,8 +275,8 @@ const ghost3 = new THREE.PointLight('#ffff00', 2, 3)
 scene.add(ghost3)
 
 //坐标辅助线
-const axesHelper = new THREE.AxesHelper(5)
-scene.add(axesHelper)
+// const axesHelper = new THREE.AxesHelper(5)
+// scene.add(axesHelper)
 
 //调试工具
 const gui = new dat.GUI();
@@ -310,6 +312,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.shadowMap.enabled = true
 moonLight.castShadow = true
 door.castShadow = true
+doorLight.castShadow = true
 ghost1.castShadow = true
 ghost2.castShadow = true
 ghost3.castShadow = true

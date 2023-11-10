@@ -61,21 +61,27 @@ window.addEventListener('resize', () => {
 const scene = new THREE.Scene()
 
 // 对象
-const geometry = new THREE.SphereGeometry(0.5, 16, 16)
-const material = new THREE.MeshBasicMaterial({ color: 'red' })
+// const geometry = new THREE.SphereGeometry(0.5, 16, 16)
+// const material = new THREE.MeshStandardMaterial({ color: 'red' })
 
-const object2 = new THREE.Mesh(geometry, material)
-
-const object1 = new THREE.Mesh(geometry, material)
+const object1 = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16),
+    new THREE.MeshBasicMaterial({ color: '#ff0000' }))
 object1.position.x = -2
 
-const object3 = new THREE.Mesh(geometry, material)
+const object2 = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16),
+    new THREE.MeshBasicMaterial({ color: '#ff0000' }))
+
+const object3 = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16),
+    new THREE.MeshBasicMaterial({ color: '#ff0000' }))
 object3.position.x = 2
 scene.add(object1, object2, object3)
 
 
 //光照投射器
 const raycaster = new THREE.Raycaster()
+const rayOrigin = new THREE.Vector3(- 3, 0, 0)
+const rayDirection = new THREE.Vector3(10, 0, 0)
+rayDirection.normalize()
 
 
 
@@ -149,32 +155,32 @@ const tick = () => {
 
     raycaster.setFromCamera(mouse, camera)
 
-    // const rayOrigin = new THREE.Vector3(-3, 0, 0)
-    // const rayDirecetion = new THREE.Vector3(1, 0, 0)
-    // rayDirecetion.normalize()
-    // raycaster.set(rayOrigin, rayDirecetion)
+    const objectsToTest = [object1, object2, object3]
+    const intersects = raycaster.intersectObjects(objectsToTest)
 
-    const objects = [object1, object2, object3]
-    const intersects = raycaster.intersectObjects(objects)
 
-    for (let object of objects) {
-        object.material.color.set('#ff0000')
+    for (const intersect of intersects) {
+        intersect.object.material.color.set('#0000ff')
     }
 
-    for (let intersect of intersects) {
-        intersect.object.material.color.set('#0094ff')
+    for (const object of objectsToTest) {
+        if (!intersects.find(intersect => intersect.object === object)) {
+            object.material.color.set('#ff0000')
+        }
     }
 
     if (intersects.length) {
         if (!currentIntersect) {
-            console.log('mouse enter');
+            console.log('mouse enter')
         }
+
         currentIntersect = intersects[0]
     }
     else {
         if (currentIntersect) {
-            console.log('mouse leave');
+            console.log('mouse leave')
         }
+
         currentIntersect = null
     }
     //控制器更新

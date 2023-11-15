@@ -1,0 +1,11 @@
+Model Information:
+* title:	Kuriyama Mirai
+* source:	https://sketchfab.com/3d-models/kuriyama-mirai-427d2e88f76746d2acb8996e5847501f
+* author:	Sumire Nishi (https://sketchfab.com/Nishi_Suzuki)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Kuriyama Mirai" (https://sketchfab.com/3d-models/kuriyama-mirai-427d2e88f76746d2acb8996e5847501f) by Sumire Nishi (https://sketchfab.com/Nishi_Suzuki) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
